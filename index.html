@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="eBay Store Listing Analytics" />
+        <meta name="author" content="Craig M. Rosenblum" />
+
+        <title>nlyz - eBay Store Listing Analytics</title>
+
+		<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180">
+		<link rel="icon" href="assets/favicon-32x32.png" sizes="32x32" type="image/png">
+		<link rel="icon" href="assets/favicon-16x16.png" sizes="16x16" type="image/png">
+		<link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/bootstrap.min.css" rel="stylesheet" />
+
+		<!-- Awesome Font CDN -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		
+		<!-- Google Font -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+		<style>
+			/* Google Font Setup */
+			font-family: 'Open Sans', sans-serif;
+			/* Some custom styles to beautify this example */
+			.demo-content{
+				padding: 15px;
+				font-size: 18px;
+				margin-bottom: 15px;
+			}
+		</style>		
+    </head>
+    <body>
+        <!-- Responsive navbar-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">nlyz</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="index.html">Home</a></li>
+                        <!---
+                        <li class="nav-item"><a class="nav-link" href="#">Link</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="#">Action</a></li>
+                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
+                        </li>
+                        --->
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Page content-->
+        <div class="container">
+
+			<!--Row with two columns divided in 1:3 ratio-->
+			<div class="row">
+            
+                <!-- create 3 column layout -->
+				<div class="col-md-3">
+
+                    <br/>
+
+                    <!-- start of form -->
+                    <form class="d-grid gap-2">
+                    <input type="hidden" id="pagenum" value="1" />
+                    
+
+                    <input type="text" id="storename" class="form-control" placeholder="Store name">
+                    
+                    <br/>
+					<!---
+                    Select eBay Region:
+                    <select name="siteID" id="siteID" class="form-select" style="width:100%">
+                        <option value="">-select-</option>
+                        <option value="ebay.com">US</option>
+                        <option value="ebay.co.uk">UK</option>
+                        <option value="ebay.com.au">Australia</option>
+                        <option value="ebay.at">Austria</option>
+                        <option value="benl.ebay.be">Belgium (de)</option>
+                        <option value="befr.ebay.be">Belgium (fr)</option>
+                        <option value="ebay.ca">Canada</option>
+                        <option value="cafr.ebay.ca">Canada (fr)</option>
+                        <option value="ebay.fr">France</option>
+                        <option value="ebay.de">Germany</option>
+                        <option value="ebay.in">India</option>
+                        <option value="ebay.ie">Ireland</option>
+                        <option value="ebay.it">Italy</option>
+                        <option value="ebay.nl">Netherlands</option>
+                        <option value="ebay.pl">Poland</option>
+                        <option value="ebay.es">Spain</option>
+                        <option value="ebay.ch">Switzerland</option>
+                        <option value="motors.ebay.com">eBayMotors</option>
+                    </select>
+                    
+                    <br/>
+					--->
+                    
+                    <select name="reportID" id="reportID" class="form-select" style="width:100%;">
+                        <option disabled selected value> -- Select Report Type -- </option>
+                        <option value=1>Duplicate</option>
+                    </select>
+                    
+                    <br/>
+                    
+                    <button type="submit" id="submit" class="btn btn-primary btn-lrg">Submit</button>
+
+                    </form>
+                    
+                    <br/><br/>
+
+
+
+				</div>
+                
+				<div class="col-md-9">
+					
+					<br/>
+					
+					<!-- show status of ajax/jquery -->
+					<div id="status" class="alert alert-info"></div>
+
+					<!-- ajax processing, loading or error messages -->
+					<div id="message" class="alert alert-danger"></div>
+					
+					<!-- progress bar -->
+					<div class="progress">
+					  <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+					</div>					
+
+					<!-- instructions -->
+					<div id="instructions">
+						<h2>Instructions:</h2>
+						<p>Please enter in your store name, then select what type of report then hit submit. </p>
+						<p>Once you do that we will be collecting all the data and generating the report as you wish in the background.</p>
+						<br/>
+						<p>Please be patient.</p>
+					</div>
+
+					<!-- tables for store item data -->
+					<table id="table-head" class="table table-hover" width="100%" border="0" cellspacing="0" cellpadding="2">
+
+						<!-- table header -->
+						<thead>
+							<tr class="table-secondary">
+								<th>#</th>
+								<th>Thumb</th>
+								<th>Item #</th>
+								<th>Title</th>
+								<th>Condition</th>
+								<th>Price</th>
+							</tr>
+						</thead>
+					
+						<!-- table row data -->
+						<tbody id="table-data">
+						</tbody>
+					
+					</table>
+					
+					<br/>
+					
+					<!-- display pagination -->
+					<div class="text-xs-center justify-content-center">
+						<ul class="pagination pagination-lg">
+						</ul>					
+					</div>
+
+				</div>
+			</div>
+			
+        </div>
+
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+
+		<!-- jquery cdn -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+
+        <script src="js/pagination.min.js"></script>
+		
+		<!-- ajax query get results -->
+		<script>
+        
+            // hide the message div by default
+            $('#message').hide(100);
+			
+			// hide progress bar
+			$('.progress').hide(100);
+			
+			// hide table div by default
+			$('#table-head').hide(100);
+        
+            // when form button is clicked call makerequest function
+            $("#submit").on('click',function(e){
+                
+                // prevent actual submitting
+                e.preventDefault();
+                
+                // hide instructions
+                $('.instructions').hide(100);
+
+				// debugging
+				$("#status").text('Click: Start Progress');
+                
+                // call request to start the steps
+                makeRequest();
+				
+				// change progress bar width to 0
+				$('.progress-bar').css('width', 0);
+				
+				// change progress bar aria-valuenow
+				$('.progress-bar').attr('aria-valuenow', 0);
+				
+				// unhide progress bar
+				$('.progress').show(100);
+				
+                
+                
+            });			
+            
+            // step 1. get storename and make request
+            
+            // function to make ajax request for 
+            function makeRequest() {
+            
+				// debugging
+				$("#status").text('Make Request: Starting');
+			
+                // set variables
+                var msg = '';
+            
+				// get report type
+				var reporttype = $('#reportID').val();
+                
+                // check if report type is null
+                if (reporttype < 1 || reporttype == '') {
+                
+                    // report type not set set error message
+                    var msg = 'You need to select a report type, try again!';
+                    
+                }
+                
+                // get storename
+                var storename = $('#storename').val();
+                
+                // get length of 
+                var storelen = storename.length;
+                
+                // check if less than 6 or greater than 
+                if ((storelen < 6 || storelen > 64) && reporttype > 0) {
+                
+                    // storename is too long set error message
+                    var msg = 'Store Name is too short or too long, try again!';
+
+                }
+                
+                // if msg length greater than zero then do not send request and just display error message
+                if (msg.length > 0) {
+                
+                    // change text inside message div
+                    $('#message').text(msg);
+                    
+                    // show the div
+                    $('#message').show(100);
+					
+                    // debuggin
+					$("#status").text('Make Request: Invalid store name length!');
+                    
+                } else {
+                
+                    // debugging
+                    $("#status").text('Make Request: Valid store name send request!');
+                
+                    // send request for store data
+                    $.ajax({
+
+                        url : 'ajax_process.php',
+                        type : 'POST',
+                        datatype: 'json',
+                        data : {storename: storename, reporttype: reporttype}, 
+						success : function(data) { 
+                            
+                            // hide message box
+                            $('#message').hide();
+                            
+                            // change message class
+                            $('#message').addClass('alert-success').removeClass('alert-danger');
+                            
+                            // change message content
+                            $('#message').text(data);
+                            
+                            // show message box
+                            $('#message').show(100);
+                            
+                            // debugging this
+                            $("#status").text('Make Request: Request sent, now check for progress.');
+                            
+                            // start que
+                            startQue();
+							
+							// check for results
+							checkResults();
+                            
+                        
+					    },
+						error : function(request,error) {
+							console.log("Request: "+JSON.stringify(request));
+						}
+					});		
+					 
+                
+                }
+                
+            }
+			
+			function startQue() {
+            
+                // debugging
+                $("#status").text('Start Que: Start process the que.');
+        
+                // send request for store data
+                $.ajax({
+
+                    url : 'ajax_que_process.php',
+                    type : 'POST',
+                    datatype: 'json'
+
+				});		
+
+			
+			}
+            
+            // function to check if results are completed
+			function checkResults() {
+			
+				// hide other alert box
+				$('#message').hide(100);
+
+                // debugging
+                $("#status").text('Check Request: Check Progress.');
+
+                // get storename
+                var storename = $('#storename').val();
+
+                // get report type
+                var reporttype = $('#reportID').val();
+        
+                // send request for store data
+                $.ajax({
+
+                    url : 'ajax_check_results.php',
+                    type : 'POST',
+                    datatype: 'json',
+                    data : {storename: storename, reporttype: reporttype}, 
+                    success : function(data) { 
+                    
+                        // change progress bar length to result percentage
+						$('.progress-bar').css("width", data + '%').attr('aria-valuenow', data + '%');
+                        
+                        // if result is 100 then show results
+						if (data == 100) {
+						
+							// get all the results
+							getResults();
+							
+						} else {
+						
+							// check the results again
+							checkResults();
+							
+						}
+                        
+                    },
+                    error : function(request,error) {
+                        console.log("Request: "+JSON.stringify(request));
+                    }
+                });		
+			}
+            
+            // function to get results when completed
+            function getResults() {
+            
+                // debugging
+                $("#status").text('Get Results: Collecting data based on report chosen.');
+                
+                // output data collected
+                $.ajax({
+
+                    url : 'ajax_output.php',
+                    type : 'GET',
+                    dataType:'json',
+                    success : function(data) { 
+                            
+                        // erase current div content
+                        // $('.bg-alt').empty();
+                        
+                        // get total count of data
+                        var count = data.length;
+                        
+                        // add data to table
+                        $.each(data, function(i, item) {
+                        
+                            // append each row to tbody
+                            var $tr = $('<tr valign=top class="table-striped" id="content">').append(
+                                $('<td>').text(i),
+                                $('<td>').html(item.thumb),
+                                $('<td>').html(item.url),
+                                $('<td>').text(item.title),
+                                $('<td>').text(item.condition),
+                                $('<td>').text(item.price)
+                            ).appendTo('#table-head tbody');
+
+                            // console.log($tr.wrap('<p>').html());
+                            
+                        });
+                        
+                        // draw pages
+                        getPagination();
+                        
+                        // console.log('Data: '+data);
+                    },
+                    error : function(request,error)
+                    {
+                        $("#status").text("Request: "+JSON.stringify(request));
+                    }
+                });		
+            }
+		</script>
+
+    </body>
+</html>
